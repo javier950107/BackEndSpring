@@ -1,8 +1,16 @@
 package com.example.backend.repositories;
 
-import org.springframework.data.repository.CrudRepository;
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
 
 import com.example.backend.models.UserModel;
 
-public interface UserRepository extends CrudRepository<UserModel, Long>{
+@Repository
+public interface UserRepository{
+    public void save(UserModel userModel);
+    public List<UserModel> findAll();
+    public boolean findById(Long id);
+    public void deleteById(Long id);
+    public boolean validateUserExists(String user, String email);
 }

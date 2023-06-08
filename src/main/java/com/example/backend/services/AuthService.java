@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.example.backend.models.UserModel;
 import com.example.backend.repositories.AuthRespository;
 import com.example.backend.utils.Encrypt;
+import com.example.backend.utils.Response;
 
 @Service
 public class AuthService {
@@ -21,30 +22,28 @@ public class AuthService {
     private AuthRespository authRespository;
     @Autowired
     private Encrypt encrypt;
+    @Autowired
+    private Response response;
 
     public ResponseEntity<Map<String, Object>> onAuthUser(String user, String password){
         try{
-            String encryptPassword = encrypt.encode(password);
-            System.out.println(encryptPassword);
-            List<UserModel> listUser = authRespository.validateUser(user, encryptPassword);
-            //TODO: Map to utils
+            List<UserModel> listUser = authRespository.getUser(user);
+
             if(listUser == null){
-                Map<String,Object> response = new HashMap<>();
-                response.put("status", 0);
-                response.put("message", "User doesn't exists");
-                response.put("token", null );
-                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(response.getResponse("User doesn't exists", null), HttpStatus.NOT_FOUND);
             }else{
-                Long idUser = listUser.get(0).getId();
-                String token = "Token";
-                authRespository.crateToken(idUser, token);
-    
-                Map<String,Object> response = new HashMap<>();
-                response.put("status", 1);
-                response.put("message", "Here is your token!");
-                response.put("token", token);
-    
-                return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+                // check if is the user
+                String passwordUser = listUser.get(0).getPassword();
+                if(encrypt.verify(password, passwordUser)){
+                    // TODO Create token
+                    Long idUser = listUser.get(0).getId();
+                    String token = "Token";
+                    authRespository.crateToken(idUser, token);
+        
+                    return new ResponseEntity<>(response.getResponse("Here is your token", token), HttpStatus.ACCEPTED);
+                }else{        
+                    return new ResponseEntity<>(response.getResponse("Wrong password!", null), HttpStatus.UNAUTHORIZED);
+                }
             }
         }catch(Exception err){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);

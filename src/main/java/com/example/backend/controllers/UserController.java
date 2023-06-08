@@ -23,7 +23,7 @@ public class UserController {
     private UserService userService;
 
     @RequestMapping(value = "/users/register", method = RequestMethod.POST)
-    public @ResponseBody ResponseEntity<UserModel> setNewUser(@ModelAttribute UserModel user){
+    public @ResponseBody ResponseEntity<Map<String,Object>> setNewUser(@ModelAttribute UserModel user){
         return userService.setNewUser(user);
     }
 

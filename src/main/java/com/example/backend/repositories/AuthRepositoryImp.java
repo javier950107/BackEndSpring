@@ -24,13 +24,12 @@ public class AuthRepositoryImp implements AuthRespository{
     }
 
     @Override
-    public List<UserModel> validateUser(String user, String password) {
+    public List<UserModel> getUser(String user) {
         TypedQuery<UserModel> query = entityManager
-            .createQuery("FROM UserModel WHERE user = :user AND password = :password ",UserModel.class); 
+            .createQuery("FROM UserModel WHERE user = :user",UserModel.class); 
         
             List<UserModel> userFound = query
             .setParameter("user", user)
-            .setParameter("password", password)
             .getResultList();
         
         if (userFound.isEmpty()){

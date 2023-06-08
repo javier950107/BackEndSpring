@@ -1,6 +1,6 @@
 package com.example.backend.services;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.example.backend.models.UserModel;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.utils.Encrypt;
+import com.example.backend.utils.Response;
 
 
 @Service
@@ -21,36 +22,44 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private Encrypt encrypt;
+    @Autowired
+    private Response response;
 
     
     // set the a new user
-    public ResponseEntity<UserModel> setNewUser(UserModel user){
+    public ResponseEntity<Map<String,Object>> setNewUser(UserModel user){
         try {
-            user.setPassword(encrypt.encode(user.getPassword()));
-            UserModel newUser = userRepository.save(user);
-            return new ResponseEntity<>(newUser, HttpStatus.CREATED);   
+            if (!userRepository.validateUserExists(user.getUser(), user.getEmail())){
+                user.setPassword(encrypt.encode(user.getPassword()));
+                userRepository.save(user);
+                return new ResponseEntity<>(response.getResponse("User registered with success!", null), HttpStatus.CREATED);
+            }else{
+                return new ResponseEntity<>(response
+                    .getResponse("User register with the same user or email", null), HttpStatus.CONFLICT);
+            }
+   
         } catch (Exception e) {
             System.out.println(e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
     }
 
-    public Iterable<UserModel> getAllUsers(){
+    public List<UserModel> getAllUsers(){
         return userRepository.findAll();
     }
 
     public ResponseEntity<Map<String,Object>> deleteUserById(Long id){
-        Optional<UserModel> foundUser = userRepository.findById(id);
+        boolean foundUser = userRepository.findById(id);
 
-        if (foundUser.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User doesn't exists!");
-        }else{
-            userRepository.deleteById(id);
-            Map<String, Object> map = new HashMap<>();
-            map.put("status", 1);
-            map.put("msg", "Success deleted");
-            map.put("data", null);
-            return new ResponseEntity<>(map, HttpStatus.OK);
+        try {
+            if (!foundUser){
+                return new ResponseEntity<>(response.getResponse("User doesn't exists", null), HttpStatus.NOT_FOUND);
+            }else{
+                userRepository.deleteById(id);
+                return new ResponseEntity<>(response.getResponse("Success deleted", null), HttpStatus.OK);
+            }   
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
     }
 }

@@ -8,6 +8,6 @@ import com.example.backend.models.UserModel;
 
 @Repository
 public interface AuthRespository {
-    public List<UserModel> validateUser(String user, String password);
+    public List<UserModel> getUser(String user);
     public void crateToken(Long idUser, String token);
 }
