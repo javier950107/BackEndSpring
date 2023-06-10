@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.example.backend.models.UserModel;
 import com.example.backend.repositories.AuthRespository;
 import com.example.backend.utils.Encrypt;
+import com.example.backend.utils.JWTUtil;
 import com.example.backend.utils.Response;
 
 @Service
@@ -23,6 +24,8 @@ public class AuthService {
     private Encrypt encrypt;
     @Autowired
     private Response response;
+    @Autowired
+    private JWTUtil jwtUtil;
 
     public ResponseEntity<Map<String, Object>> onAuthUser(String user, String password){
         try{
@@ -34,9 +37,9 @@ public class AuthService {
                 // check if is the user
                 String passwordUser = listUser.get(0).getPassword();
                 if(encrypt.verify(password, passwordUser)){
-                    // TODO Create token
+
                     Long idUser = listUser.get(0).getId();
-                    String token = "Token";
+                    String token = jwtUtil.createToken(idUser.toString(), user);
                     authRespository.crateToken(idUser, token);
         
                     return new ResponseEntity<>(response.getResponse("Here is your token", token), HttpStatus.ACCEPTED);

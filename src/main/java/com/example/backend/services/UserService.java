@@ -64,6 +64,6 @@ public class UserService {
 }
 
 
-// Login jwt
-// Datatype middleware
-// joins
+// Login jwt -> Validation
+// Microservices
+// READY TO THE PLAN!!

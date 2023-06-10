@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.example.backend.interceptor.CustomInterceptor;
 import com.example.backend.models.UserModel;
 import com.example.backend.services.UserService;
+
 
 @Controller
 public class UserController {
