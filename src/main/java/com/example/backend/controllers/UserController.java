@@ -28,7 +28,7 @@ public class UserController {
         return userService.setNewUser(user);
     }
 
-    @GetMapping(path = "/all")
+    @GetMapping(path = "/users/all")
     @ResponseStatus(HttpStatus.FOUND)
     public @ResponseBody Iterable<UserModel> getAllUsers(){
         return userService.getAllUsers();

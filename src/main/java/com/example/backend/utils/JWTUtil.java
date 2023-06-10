@@ -57,10 +57,15 @@ public class JWTUtil {
 
     // get the information by token
     public String getKey(String jwt){
-        Claims claim = Jwts.parser()
+        try {
+            Claims claim = Jwts.parser()
             .setSigningKey(DatatypeConverter.parseBase64Binary(key))
             .parseClaimsJws(jwt)
             .getBody();
-        return claim.getId();
+
+            return claim.getId();   
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

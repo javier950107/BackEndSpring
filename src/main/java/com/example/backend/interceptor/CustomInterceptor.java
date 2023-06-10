@@ -1,20 +1,46 @@
 package com.example.backend.interceptor;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties.Jwt;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.example.backend.utils.JWTUtil;
+import com.example.backend.utils.Response;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class CustomInterceptor implements HandlerInterceptor {
+
+    @Autowired
+    JWTUtil jwtUtil;
+
+    @Autowired
+    Response responseUtil;
     
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)throws Exception{
         // This method is called before the actual handler is executed.
         // You can perform pre-processing here.
-        System.out.println("Pre-handle method is called");
+        String token = request.getHeader("Authorization");
+        
+        if (token == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write(new ObjectMapper().writeValueAsString(responseUtil.getResponse("Unauthorized ", null)));
+            return false;
+        }
+        
+        String userId = jwtUtil.getKey(token);
+        if(userId == null){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write(new ObjectMapper().writeValueAsString(responseUtil.getResponse("Invalidad token or session expired! ", null)));
+            return false;
+        }
+
         return true;
     }
 
